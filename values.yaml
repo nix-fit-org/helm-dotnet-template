@@ -1,0 +1,147 @@
+---
+
+image:
+  # -- image registry
+  registry: nix-docker.registry.twcstorage.ru
+  # -- image repository
+  repository:
+  # -- image tag
+  tag:
+  # -- image digest
+  digest:
+  # -- image pull policy
+  pullPolicy: Always
+
+serviceAccount:
+  # -- service account name
+  name: default
+  # -- service account auto mount token
+  automountServiceAccountToken: false
+
+# -- replica count
+replicaCount: 2
+# -- progress deadline seconds
+progressDeadlineSeconds: 180
+# -- revision history limit
+revisionHistoryLimit: 1
+
+updateStrategy:
+  # -- update strategy type
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 1
+
+service:
+  # -- service port (app)
+  port: 8080
+
+annotations:
+  deployment:
+    prometheus:
+      # -- prometheus scrape enabled
+      scrape: "true"
+      # -- prometheus metrics path
+      path: "/metrics"
+      # -- prometheus metrics port
+      port: "8080"
+  ingress:
+    certManager:
+      # -- cert manager cluster issuer
+      clusterIssuer: "letsencrypt-prod"
+
+ingress:
+  # -- open access to app outside cluster via ingress
+  enabled: false
+  # -- ingress class name
+  className: nginx
+  # -- ingress host
+  host: ""
+  # -- ingress tls secret name (where to store signed certificate from Let's Encrypt)
+  tlsSecretName: ""
+
+gateway:
+  # -- gateway enabled
+  enabled: false
+  # -- gateway object name
+  name: envoy-gateway
+  # -- gateway object namespace
+  namespace: envoy-gateway-system
+  httpRoute:
+    # -- httproute gateway parentRef
+    httpSectionName: http-80
+    # -- httproute hostname
+    host: ""
+    filters:
+      responseHeaderModifier:
+        # -- response header modifier filter set (override headers values)
+        set:
+        - name: Content-Security-Policy
+          value: frame-src 'self'; frame-ancestors 'self'; object-src 'none';
+        - name: Referrer-Policy
+          value: no-referrer
+        - name: Strict-Transport-Security
+          value: max-age=31536000; includeSubDomains
+        - name: X-Content-Type-Options
+          value: nosniff
+        - name: X-Frame-Options
+          value: SAMEORIGIN
+
+podDisruptionBudget:
+  # -- pod disruption budget max unavailable
+  maxUnavailable: 1
+
+resources:
+  requests:
+    # -- cpu requests
+    cpu: 250m
+    # -- memory requests
+    memory: 256Mi
+    # -- ephemeral storage requests
+    ephemeral-storage: 128Mi
+  limits:
+    # -- cpu limits
+    cpu: 500m
+    # memory limits
+    memory: 768Mi
+    # -- ephemeral storage limits
+    ephemeral-storage: 256Mi
+
+probes:
+  liveness:
+    # -- liveness probe path
+    path: /health
+    # -- liveness probe initial delay
+    initialDelaySeconds: 60
+    # -- liveness probe period
+    periodSeconds: 5
+    # -- liveness probe timeout per attempt
+    timeoutSeconds: 1
+    # -- liveness probe max consecutive failures before restart
+    failureThreshold: 5
+  readiness:
+    # -- readiness probe path
+    path: /health
+    # -- readiness probe inital delay
+    initialDelaySeconds: 60
+    # -- readiness probe period
+    periodSeconds: 5
+    # -- readiness probe timeout per attempt
+    timeoutSeconds: 1
+    # -- readiness probe max consecutive failures before unready
+    failureThreshold: 5
+
+app:
+  # -- app environment variables
+  env:
+    # -- app listen addresses
+    ASPNETCORE_URLS: http://0.0.0.0:8080
+    # -- app environment name
+    ASPNETCORE_ENVIRONMENT: Production
+  secrets:
+    # -- app secret environment variables
+    env:
+    # -- app secret certificates mount directory
+    certificatesMountDir: /etc/ssl
+    # -- app secret certificates
+    certificates: []
