@@ -132,6 +132,13 @@ probes:
     failureThreshold: 5
 
 app:
+  migrations:
+    # -- enable pre-install/pre-upgrade DB migrations job (runs app with --run-migrations)
+    enabled: false
+    # -- backoff limit for the migrations Job
+    backoffLimit: 3
+    # -- extra annotations for the Job (in addition to Helm hooks)
+    annotations: {}
   # -- app environment variables
   env:
     # -- app listen addresses

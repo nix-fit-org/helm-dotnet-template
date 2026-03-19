@@ -1,6 +1,6 @@
 # dotnet-app-template
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Description
 
@@ -86,6 +86,9 @@ helm-docs --template-files=README.md.gotmpl
 | app.env | object | `{"ASPNETCORE_ENVIRONMENT":"Production","ASPNETCORE_URLS":"http://0.0.0.0:8080"}` | app environment variables |
 | app.env.ASPNETCORE_ENVIRONMENT | string | `"Production"` | app environment name |
 | app.env.ASPNETCORE_URLS | string | `"http://0.0.0.0:8080"` | app listen addresses |
+| app.migrations.annotations | object | `{}` | extra annotations for the Job (in addition to Helm hooks) |
+| app.migrations.backoffLimit | int | `3` | backoff limit for the migrations Job |
+| app.migrations.enabled | bool | `false` |  |
 | app.secrets.certificates | list | `[]` | app secret certificates |
 | app.secrets.certificatesMountDir | string | `"/etc/ssl"` | app secret certificates mount directory |
 | app.secrets.env | string | `nil` | app secret environment variables |

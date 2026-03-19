@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -25,7 +26,7 @@ spec:
         prometheus.io/path: {{ .Values.annotations.deployment.prometheus.path | quote }}
         prometheus.io/port: {{ .Values.annotations.deployment.prometheus.port | quote }}
     spec:
-      serviceAccount: {{ .Values.serviceAccount.name }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       affinity:
         {{- include "commonlib.podAntiAffinity" . | nindent 8 }}
@@ -65,8 +66,20 @@ spec:
             {{- include "commonlib.volumeMounts" . | nindent 12 }}
             - name: app
               mountPath: /opt/app/data
+            {{- $mountDir := .Values.app.secrets.certificatesMountDir }}
+            {{- range .Values.app.secrets.certificates }}
+            - name: certificates
+              mountPath: {{ printf "%s/%s" $mountDir .fileName }}
+              subPath: {{ .fileName }}
+              readOnly: true
+            {{- end }}
       volumes:
         {{- include "commonlib.volumes" . | nindent 8 }}
         - name: app
           emptyDir:
             sizeLimit: 128Mi
+        {{- with .Values.app.secrets.certificates }}
+        - name: certificates
+          secret:
+            secretName: {{ $.Release.Name }}-certificates
+        {{- end }}
